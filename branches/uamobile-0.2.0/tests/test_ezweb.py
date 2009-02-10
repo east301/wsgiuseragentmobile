@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect
+from uamobile import detect, Context
+from uamobile.ezweb import EZwebUserAgent
+from uamobile.factory.ezweb import EZwebUserAgentFactory
 
 def test_netfront_nonmobile_mode():
     ua = detect({'HTTP_USER_AGENT':'KDDI-TS3A UP.Browser/6.2.0.11.2.1 (GUI) MMP/2.0, Mozilla/4.08 (MobilePhone; NMCS/3.3) NetFront/3.3'})
@@ -146,6 +148,41 @@ def test_is_bogus():
         ):
         yield func, ip, expected
 
+def test_extra_ip():
+    ctxt1 = Context(extra_ezweb_ips=['192.168.0.0/24'])
+    ua = detect({'HTTP_USER_AGENT': 'KDDI-HI36 UP.Browser/6.2.0.10.4 (GUI) MMP/2.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt1)
+    assert ua.is_ezweb()
+    assert ua.is_bogus() is False
+
+    ctxt2 = Context(extra_ezweb_ips=[])
+    ua = detect({'HTTP_USER_AGENT': 'KDDI-HI36 UP.Browser/6.2.0.10.4 (GUI) MMP/2.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt2)
+    assert ua.is_ezweb()
+    assert ua.is_bogus() is True
+
+
+def test_my_factory():
+    class MyEZwebUserAgent(EZwebUserAgent):
+        def get_my_attr(self):
+            return self.environ.get('HTTP_X_DOCOMO_UID')
+
+    class MyEZwebUserAgentFactory(EZwebUserAgentFactory):
+        device_class = MyEZwebUserAgent
+
+    context = Context(ezweb_factory=MyEZwebUserAgentFactory)
+    ua = detect({'HTTP_USER_AGENT'  : 'KDDI-HI36 UP.Browser/6.2.0.10.4 (GUI) MMP/2.0',
+                 'REMOTE_ADDR'      : '192.168.0.1',
+                 'HTTP_X_DOCOMO_UID': 'spam',
+                 },
+                context=context)
+    assert ua.is_ezweb()
+    assert isinstance(ua, MyEZwebUserAgent)
+    assert ua.get_my_attr() == 'spam'
 
 #########################
 # Test data

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from uamobile import detect
+from uamobile import detect, Context
 
 def test_crawler():
     def func(ip, useragent):
@@ -46,3 +46,23 @@ def test_not_crawler():
         ('66.249.70.39', 'DoCoMo/1.0/N505i/c20/TB/W20H10 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'),
         ):
         yield func, ip, ua
+
+
+def test_extra_ip():
+    ctxt1 = Context(extra_crawler_ips=['192.168.0.0/24'])
+    ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;KYOCERA/WX310K/2;1.2.7.17.000000/0.1/C100) Opera 7.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt1)
+    assert ua.is_willcom()
+    assert ua.is_crawler() is True
+    assert ua.is_bogus() is True
+
+    ctxt2 = Context(extra_crawler_ips=[])
+    ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;KYOCERA/WX310K/2;1.2.7.17.000000/0.1/C100) Opera 7.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt2)
+    assert ua.is_willcom()
+    assert ua.is_crawler() is False
+    assert ua.is_bogus() is True

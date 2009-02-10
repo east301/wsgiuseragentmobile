@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect
+from uamobile import detect, Context
+from uamobile.willcom import WillcomUserAgent
+from uamobile.factory.willcom import WillcomUserAgentFactory
 
 def test_useragent():
     def inner(useragent, name, vendor, model, model_version, browser_version, cache_size):
@@ -40,6 +42,42 @@ def test_is_bogus():
         ('61.198.128.0', False),
         ):
         yield func, ip, expected
+
+def test_extra_ip():
+    ctxt1 = Context(extra_willcom_ips=['192.168.0.0/24'])
+    ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;KYOCERA/WX310K/2;1.2.7.17.000000/0.1/C100) Opera 7.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt1)
+    assert ua.is_willcom()
+    assert ua.is_bogus() is False
+
+    ctxt2 = Context(extra_willcom_ips=[])
+    ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;KYOCERA/WX310K/2;1.2.7.17.000000/0.1/C100) Opera 7.0',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt2)
+    assert ua.is_willcom()
+    assert ua.is_bogus() is True
+
+
+def test_my_factory():
+    class MyWillcomUserAgent(WillcomUserAgent):
+        def get_my_attr(self):
+            return self.environ.get('HTTP_X_DOCOMO_UID')
+
+    class MyWillcomUserAgentFactory(WillcomUserAgentFactory):
+        device_class = MyWillcomUserAgent
+
+    context = Context(willcom_factory=MyWillcomUserAgentFactory)
+    ua = detect({'HTTP_USER_AGENT'  : 'Mozilla/3.0(WILLCOM;KYOCERA/WX300K/2;2.0.10.11.000000/0.1/C100) Opera/7.0',
+                 'REMOTE_ADDR'      : '192.168.0.1',
+                 'HTTP_X_DOCOMO_UID': 'spam',
+                 },
+                context=context)
+    assert ua.is_willcom()
+    assert isinstance(ua, MyWillcomUserAgent)
+    assert ua.get_my_attr() == 'spam'
 
 
 #########################
