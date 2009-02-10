@@ -6,12 +6,14 @@ class UserAgent(object):
     Base class representing HTTTP user agent.
     """
 
-    def __init__(self, environ):
+    def __init__(self, environ, context):
         try:
             self.useragent = environ['HTTP_USER_AGENT']
         except KeyError, e:
             self.useragent = ''
         self.environ = environ
+        self.context = context
+
         self.model = ''
         self.version = ''
         self._display = None
@@ -108,12 +110,13 @@ class UserAgent(object):
             return None
 
         forwared_for = self.environ.get('HTTP_X_FORWARDED_FOR')
-        if forwared_for and self._proxy_host:
+        proxy_ips = self.context.get_proxy_ips()
+        if forwared_for and proxy_ips:
             forwared_for = forwared_for.split(',', 1)[0].strip()
 
             # check REMOTE_ADDR is included in trusted reverse
             # proxy address
-            for addr in self._proxy_host:
+            for addr in proxy_ips:
                 if remote_addr in addr:
                     # override remote addr
                     remote_addr = forwared_for
@@ -141,7 +144,7 @@ class UserAgent(object):
             # who knows?
             return False
 
-        for addr in cidr.get_ip('crawler'):
+        for addr in self.context.get_ip('crawler'):
             if remote_addr in addr:
                 return True
 
@@ -156,7 +159,7 @@ class UserAgent(object):
         if remote_addr is None:
             return True
 
-        for addr in cidr.get_ip(self.carrier):
+        for addr in self.context.get_ip(self.carrier):
             if remote_addr in addr:
                 return False
 

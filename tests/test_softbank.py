@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect
+from uamobile import detect, Context
+from uamobile.softbank import SoftBankUserAgent
+from uamobile.factory.softbank import SoftBankUserAgentFactory
 
 def test_display():
     env = {'HTTP_USER_AGENT': 'Vodafone/1.0/V904SH/SHJ003/SN000000000000000 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1',
@@ -206,6 +208,43 @@ def test_is_bogus():
         ('123.108.236.0', False),
         ):
         yield func, ip, expected
+
+
+def test_extra_ip():
+    ctxt1 = Context(extra_softbank_ips=['192.168.0.0/24'])
+    ua = detect({'HTTP_USER_AGENT': 'SoftBank/1.0/816SH/SHJ001 Browser/NetFront/3.4 Profile/MIDP-2.0 Configuration/CLDC-1.1',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt1)
+    assert ua.is_softbank()
+    assert ua.is_bogus() is False
+
+    ctxt2 = Context(extra_softbank_ips=[])
+    ua = detect({'HTTP_USER_AGENT': 'SoftBank/1.0/816SH/SHJ001 Browser/NetFront/3.4 Profile/MIDP-2.0 Configuration/CLDC-1.1',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt2)
+    assert ua.is_softbank()
+    assert ua.is_bogus() is True
+
+
+def test_my_factory():
+    class MySoftBankUserAgent(SoftBankUserAgent):
+        def get_my_attr(self):
+            return self.environ.get('HTTP_X_DOCOMO_UID')
+
+    class MySoftBankUserAgentFactory(SoftBankUserAgentFactory):
+        device_class = MySoftBankUserAgent
+
+    context = Context(softbank_factory=MySoftBankUserAgentFactory)
+    ua = detect({'HTTP_USER_AGENT'  : 'SoftBank/1.0/812SH/SHJ001/SN333333333333333 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1',
+                 'REMOTE_ADDR'      : '192.168.0.1',
+                 'HTTP_X_DOCOMO_UID': 'spam',
+                 },
+                context=context)
+    assert ua.is_softbank()
+    assert isinstance(ua, MySoftBankUserAgent)
+    assert ua.get_my_attr() == 'spam'
 
 
 #########################

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect
+from uamobile import detect, Context
+from uamobile.docomo import DoCoMoUserAgent
+from uamobile.factory.docomo import DoCoMoUserAgentFactory
 
 def test_useragent_docomo():
     def inner(useragent, version, html_version, model, cache_size,
@@ -130,12 +132,13 @@ def test_crawler():
         yield (func, agent)
 
 def test_is_bogus():
+    context = Context(proxy_ips='127.0.0.1')
     def func(remote_addr, forwarded_for, expected):
         ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
                      'REMOTE_ADDR' : ip,
                      'HTTP_X_FORWARDED_FOR': forwarded_for,
                      },
-                    proxy_host='127.0.0.1')
+                    context=context)
         assert ua.is_docomo()
         res = ua.is_bogus()
         assert res == expected, '%s expected, actual %s' % (expected, res)
@@ -164,11 +167,12 @@ def test_is_bogus():
 
 
 def test_is_bogus_multiple_proxies():
+    context = Context(proxy_ips=['192.168.0.0/24', '192.168.1.0/24'])
     ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
                  'REMOTE_ADDR'    : '192.168.0.1',
                  'HTTP_X_FORWARDED_FOR': '210.153.84.0',
                  },
-                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+                context=context)
     assert ua.is_docomo()
     assert ua.is_bogus() is False
 
@@ -176,7 +180,7 @@ def test_is_bogus_multiple_proxies():
                  'REMOTE_ADDR'    : '192.168.1.1',
                  'HTTP_X_FORWARDED_FOR': '210.153.84.0',
                  },
-                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+                context=context)
     assert ua.is_docomo()
     assert ua.is_bogus() is False
 
@@ -184,16 +188,17 @@ def test_is_bogus_multiple_proxies():
                  'REMOTE_ADDR'    : '192.168.2.1',
                  'HTTP_X_FORWARDED_FOR': '210.153.84.0',
                  },
-                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+                context=context)
     assert ua.is_docomo()
     assert ua.is_bogus() is True
 
 
 def test_is_bogus_error():
+    context = Context(proxy_ips=['127.0.0.1'])
     ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
                  'REMOTE_ADDR'    : 'unknown',
                  },
-                proxy_host='127.0.0.1')
+                context=context)
     assert ua.is_docomo()
     assert ua.is_bogus()
 
@@ -201,9 +206,45 @@ def test_is_bogus_error():
                  'REMOTE_ADDR'    : '127.0.0.1',
                  'HTTP_X_FORWARDED_FOR': 'unknown,210.153.84.0',
                  },
-                proxy_host='127.0.0.1')
+                context=context)
     assert ua.is_docomo()
     assert ua.is_bogus()
+
+def test_extra_ip():
+    ctxt1 = Context(extra_docomo_ips=['192.168.0.0/24'])
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt1)
+    assert ua.is_docomo()
+    assert ua.is_bogus() is False
+
+    ctxt2 = Context(extra_docomo_ips=[])
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 },
+                context=ctxt2)
+    assert ua.is_docomo()
+    assert ua.is_bogus() is True
+
+
+def test_my_factory():
+    class MyDoCoMoUserAgent(DoCoMoUserAgent):
+        def get_uid(self):
+            return self.environ.get('HTTP_X_DOCOMO_UID')
+
+    class MyDoCoMoUserAgentFactory(DoCoMoUserAgentFactory):
+        device_class = MyDoCoMoUserAgent
+
+    context = Context(docomo_factory=MyDoCoMoUserAgentFactory)
+    ua = detect({'HTTP_USER_AGENT'  : 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'      : '192.168.0.1',
+                 'HTTP_X_DOCOMO_UID': 'spam',
+                 },
+                context=context)
+    assert ua.is_docomo()
+    assert isinstance(ua, MyDoCoMoUserAgent)
+    assert ua.get_uid() == 'spam'
 
 
 #########################
