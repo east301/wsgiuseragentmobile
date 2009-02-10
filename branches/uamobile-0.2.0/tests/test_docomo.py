@@ -134,6 +134,83 @@ def test_crawler():
     for agent in data:
         yield (func, agent)
 
+def test_is_bogus():
+    def func(remote_addr, forwarded_for, expected):
+        ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                     'REMOTE_ADDR' : ip,
+                     'HTTP_X_FORWARDED_FOR': forwarded_for,
+                     },
+                    proxy_host='127.0.0.1')
+        assert ua.is_docomo()
+        res = ua.is_bogus()
+        assert res == expected, '%s expected, actual %s' % (expected, res)
+
+    for ip, expected in (
+        ('210.153.84.0', False),
+        ('210.230.128.224', True),
+        ):
+        yield func, ip, None, expected
+
+    for ip, f, expected in (
+        # untrusted proxy address
+        ('192.168.0.1', '210.153.84.0', True),
+        ('192.168.0.1', '210.230.128.224', True),
+        ):
+        yield func, ip, f, expected
+
+    for ip, f, expected in (
+        ('127.0.0.1', '210.153.84.0', False),
+        ('127.0.0.1', '210.230.128.224', True),
+
+        ('127.0.0.1', '210.153.84.0, 192.168.0.2', False),
+        ('127.0.0.1', '210.230.128.224, 192.168.0.2', True),
+        ):
+        yield func, ip, f, expected
+
+
+def test_is_bogus_multiple_proxies():
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '192.168.0.1',
+                 'HTTP_X_FORWARDED_FOR': '210.153.84.0',
+                 },
+                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+    assert ua.is_docomo()
+    assert ua.is_bogus() is False
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '192.168.1.1',
+                 'HTTP_X_FORWARDED_FOR': '210.153.84.0',
+                 },
+                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+    assert ua.is_docomo()
+    assert ua.is_bogus() is False
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '192.168.2.1',
+                 'HTTP_X_FORWARDED_FOR': '210.153.84.0',
+                 },
+                proxy_host=['192.168.0.0/24', '192.168.1.0/24'])
+    assert ua.is_docomo()
+    assert ua.is_bogus() is True
+
+
+def test_is_bogus_error():
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : 'unknown',
+                 },
+                proxy_host='127.0.0.1')
+    assert ua.is_docomo()
+    assert ua.is_bogus()
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 P01A(c100;TB;W24H15)',
+                 'REMOTE_ADDR'    : '127.0.0.1',
+                 'HTTP_X_FORWARDED_FOR': 'unknown,210.153.84.0',
+                 },
+                proxy_host='127.0.0.1')
+    assert ua.is_docomo()
+    assert ua.is_bogus()
+
+
 #########################
 # Test data
 #########################

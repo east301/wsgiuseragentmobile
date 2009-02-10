@@ -26,6 +26,23 @@ def test_useragent():
     for args in DATA:
         yield ([inner] + list(args))
 
+
+def test_is_bogus():
+    def func(ip, expected):
+        ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;SANYO/WX310SA/2;1/1/C128) NetFront/3.3,61.198.142.127',
+                     'REMOTE_ADDR'    : ip,
+                     })
+        assert ua.is_willcom()
+        res = ua.is_bogus()
+        assert res == expected, '%s expected, actual %s' % (expected, res)
+
+    for ip, expected in (
+        ('210.230.128.224', True),
+        ('61.198.128.0', False),
+        ):
+        yield func, ip, expected
+
+
 #########################
 # Test data
 #########################

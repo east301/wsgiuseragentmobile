@@ -131,6 +131,23 @@ def test_useragent_ezweb():
     for args in DATA:
         yield ([inner] + list(args))
 
+
+def test_is_bogus():
+    def func(ip, expected):
+        ua = detect({'HTTP_USER_AGENT': 'KDDI-TS2A UP.Browser/6.2.0.9 (GUI) MMP/2.0',
+                     'REMOTE_ADDR'    : ip,
+                     })
+        assert ua.is_ezweb()
+        res = ua.is_bogus()
+        assert res == expected, '%s expected, actual %s' % (expected, res)
+
+    for ip, expected in (
+        ('210.230.128.224', False),
+        ('210.153.84.0', True),
+        ):
+        yield func, ip, expected
+
+
 #########################
 # Test data
 #########################

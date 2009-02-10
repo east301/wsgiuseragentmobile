@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from uamobile import cidr
 
 class UserAgent(object):
     """
@@ -95,6 +96,40 @@ class UserAgent(object):
         returns True if the agent supports HTTP cookie.
         """
         raise NotImplementedError
+
+    def is_bogus(self):
+        """
+        return True if the client isn't accessing via gateways of
+        japanese mobile carrier
+        """
+        try:
+            remote_addr = self.environ['REMOTE_ADDR']
+        except KeyError:
+            return True
+
+        forwared_for = self.environ.get('HTTP_X_FORWARDED_FOR')
+        if forwared_for and self._proxy_host:
+            forwared_for = forwared_for.split(',', 1)[0].strip()
+
+            # check REMOTE_ADDR is included in trusted reverse
+            # proxy address
+            for addr in self._proxy_host:
+                if remote_addr in addr:
+                    # override remote addr
+                    remote_addr = forwared_for
+                    break
+
+        try:
+            remote_addr = cidr.IP(remote_addr)
+        except ValueError:
+            return True
+
+        for addr in cidr.get_ip(self.carrier):
+            if remote_addr in addr:
+                return False
+
+        return True
+
 
 class Display(object):
     """
