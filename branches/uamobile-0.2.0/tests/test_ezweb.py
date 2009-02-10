@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect, EZweb
+from uamobile import detect
 
 def test_netfront_nonmobile_mode():
     ua = detect({'HTTP_USER_AGENT':'KDDI-TS3A UP.Browser/6.2.0.11.2.1 (GUI) MMP/2.0, Mozilla/4.08 (MobilePhone; NMCS/3.3) NetFront/3.3'})
@@ -108,7 +108,6 @@ def test_display_error():
 def test_useragent_ezweb():
     def inner(useragent, version, model, device_id, server, xhtml_compliant, comment, is_wap1, is_wap2):
         ua = detect({'HTTP_USER_AGENT':useragent})
-        assert isinstance(ua, EZweb)
         assert ua.carrier == 'EZweb'
         assert ua.short_carrier == 'E'
         assert ua.is_docomo() == False

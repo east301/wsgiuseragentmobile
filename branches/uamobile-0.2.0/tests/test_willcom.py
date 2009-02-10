@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect, Willcom
+from uamobile import detect
 
 def test_useragent():
     def inner(useragent, name, vendor, model, model_version, browser_version, cache_size):
         ua = detect({'HTTP_USER_AGENT': useragent})
 
         assert ua.is_willcom()
-        assert isinstance(ua, Willcom)
-        assert ua.name == name
         assert ua.carrier == 'WILLCOM'
         assert ua.short_carrier == 'W'
+        assert ua.name == name
         assert ua.vendor == vendor
         assert ua.model == model, ua.model
         assert ua.model_version == model_version, ua.model_version
-        assert ua.browser_version == browser_version
+        assert ua.browser_version == browser_version, '%r expected, actual %r' % (browser_version, ua.browser_version)
         if cache_size is not None:
             assert ua.cache_size == cache_size
         else:
@@ -54,8 +53,8 @@ DATA = (('Mozilla/3.0(DDIPOCKET;JRC/AH-J3001V,AH-J3002V/1.0/0100/c50)CNF/2.0', '
         ('Mozilla/3.0(WILLCOM;SANYO/WX310SA/2;1/1/C128) NetFront/3.3,61.198.142.127', 'WILLCOM', 'SANYO', 'WX310SA', '2;1', '1', 128),
 
         # IE on W-zero3
-        ('Mozilla/4.0 (compatible; MSIE 4.01; Windows CE; SHARP/WS007SH; PPC; 480x640)', 'WILLCOM', 'SHARP', 'WS007SH', '', '', None),
+        ('Mozilla/4.0 (compatible; MSIE 4.01; Windows CE; SHARP/WS007SH; PPC; 480x640)', 'WILLCOM', 'SHARP', 'WS007SH', None, 'MSIE 4.01', None),
 
         # Opera on W-zero3
-        ('Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; SHARP/WS007SH; PPC; 480x640) Opera 8.60 [ja]', 'WILLCOM', 'SHARP', 'WS007SH', '', '', None),
+        ('Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; SHARP/WS007SH; PPC; 480x640) Opera 8.60 [ja]', 'WILLCOM', 'SHARP', 'WS007SH', None, 'MSIE 6.0', None),
 )

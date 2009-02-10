@@ -16,7 +16,7 @@ def test_crawler():
         ('202.238.103.126', 'DoCoMo/2.0 N902iS(c100;TB;W24H12)(compatible; moba-crawler; http://crawler.dena.jp/)'),
         ('202.213.221.97', 'DoCoMo/2.0 N902iS(c100;TB;W24H12)(compatible; moba-crawler; http://crawler.dena.jp/)'),
         # Crawler whose IP is valid but the useragent contains FOMA hardware ID
-        ('60.43.36.253', 'DoCoMo/2.0 M702iS(c100;TB;W24H13;ser333343013301464;icc8981100000617933232F)'),
+        ('60.43.36.253', 'DoCoMo/2.0 M702iS(c100;TB;W24H13;ser333333033303333;icc8981100000333333333F)'),
         # Google
         ('209.85.238.17', 'DoCoMo/1.0/N505i/c20/TB/W20H10 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'),
         ('72.14.199.1', 'DoCoMo/1.0/N505i/c20/TB/W20H10 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect, DoCoMo, exceptions
+from uamobile import detect
 
 def test_useragent_docomo():
     def inner(useragent, version, html_version, model, cache_size,
@@ -8,7 +8,6 @@ def test_useragent_docomo():
 
         ua = detect({'HTTP_USER_AGENT':useragent})
         assert ua.is_docomo()
-        assert isinstance(ua, DoCoMo)
         assert ua.is_ezweb() == False
         assert ua.is_softbank() == False
         assert ua.is_vodafone() == False
@@ -64,12 +63,8 @@ def test_guid():
 
 def test_not_matching_error():
     def func(ua):
-        try:
-            detect({'HTTP_USER_AGENT': ua})
-        except exceptions.NoMatchingError:
-            pass
-        else:
-            assert False, ua
+        device = detect({'HTTP_USER_AGENT': ua})
+        assert device.is_docomo()
 
     # No parenthis
     yield (func, 'DoCoMo/2.0 SO905i(c100;TB;W24H18')

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import re
-import uamobile.exceptions
 from uamobile.nonmobile import NonMobileUserAgent as NonMobile
-from uamobile.docomo import DoCoMoUserAgent as DoCoMo
-from uamobile.ezweb import EZwebUserAgent as EZweb
-from uamobile.softbank import SoftBankUserAgent as SoftBank
-from uamobile.willcom import WillcomUserAgent as Willcom
+
+from uamobile.factory.docomo import *
+from uamobile.factory.ezweb import *
+from uamobile.factory.softbank import *
+from uamobile.factory.willcom import *
 
 from IPy import IP
 
-__all__ = ['detect', 'NonMobile', 'DoCoMo', 'EZweb', 'SoftBank', 'Willcom']
+__all__ = ['detect', 'NonMobile']
 
 DOCOMO_RE   = re.compile(r'^DoCoMo/\d\.\d[ /]')
 SOFTBANK_RE = re.compile(r'^(?:(?:SoftBank|Vodafone|J-PHONE)/\d\.\d|MOT-)')
@@ -23,25 +23,20 @@ def detect(environ, proxy_host=None):
     try:
         useragent = environ['HTTP_USER_AGENT']
     except KeyError:
-        useragent = ''
+        return NonMobile(environ)
 
     if DOCOMO_RE.match(useragent):
-        device = DoCoMo(environ)
+        factory = DoCoMoUserAgentFactory()
     elif EZWEB_RE.match(useragent):
-        device = EZweb(environ)
+        factory = EZwebUserAgentFactory()
     elif SOFTBANK_RE.match(useragent):
-        device = SoftBank(environ)
+        factory = SoftBankUserAgentFactory()
     elif WILLCOM_RE.match(useragent):
-        device = Willcom(environ)
+        factory = WillcomUserAgentFactory()
     else:
-        device = NonMobile(environ)
+        return NonMobile(environ)
 
-    try:
-        device.parse()
-    except exceptions.NoMatchingError, e:
-        raise e
-    except ValueError, e:
-        raise exceptions.NoMatchingError(device, e)
+    device = factory.create(environ)
 
     # TODO
     hosts = []

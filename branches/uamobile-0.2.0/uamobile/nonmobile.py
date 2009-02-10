@@ -16,9 +16,6 @@ class NonMobileUserAgent(UserAgent):
     def supports_cookie(self):
         return True
 
-    def parse(self):
-        pass
-
     def make_display(self):
         """
         create a new Display object.
