@@ -195,6 +195,23 @@ def test_error_agents():
     for datum in ERRORS:
         yield tester, datum
 
+
+def test_is_bogus():
+    def func(ip, expected):
+        ua = detect({'HTTP_USER_AGENT': 'SoftBank/1.0/705P/PJP10 Browser/Teleca-Browser/3.1 Profile/MIDP-2.0 Configuration/CLDC-1.1',
+                     'REMOTE_ADDR'    : ip,
+                     })
+        assert ua.is_softbank()
+        res = ua.is_bogus()
+        assert res == expected, '%s expected, actual %s' % (expected, res)
+
+    for ip, expected in (
+        ('210.230.128.224', True),
+        ('123.108.236.0', False),
+        ):
+        yield func, ip, expected
+
+
 #########################
 # Test data
 #########################
