@@ -5,14 +5,6 @@ from uamobile.docomodisplaymap import DISPLAYMAP_DOCOMO
 
 import re
 
-try:
-    frozenset
-except NameError:
-    from sets import Set as frozenset
-
-STATUS_SET = frozenset(['TC', 'TD', 'TB', 'TJ'])
-
-DISPLAY_BYTES_RE = re.compile(r'^W(\d+)H(\d+)$')
 VENDOR_RE = re.compile(r'([A-Z]+)\d')
 
 FOMA_SERIES_4DIGITS_RE = re.compile(r'\d{4}')
@@ -47,18 +39,31 @@ class DoCoMoUserAgent(UserAgent):
                          ))
 
     def __init__(self, *args, **kwds):
-        UserAgent.__init__(self, *args, **kwds)
-        self.version = ''
-        self.bandwidth = None
-        self.serialnumber = None
-        self.card_id = None
-        self.comment = None
-        self.cache_size = 5
-        self._display_bytes = None
-        self._is_foma = False
+        super(DoCoMoUserAgent, self).__init__(*args, **kwds)
+        self.ser = None
+        self.icc = None
+        self.status = None
+        self.s = None
+        self.c = 5
 
     def is_docomo(self):
         return True
+
+    def get_cache_size(self):
+        return self.c
+    cache_size = property(get_cache_size)
+
+    def get_bandwidth(self):
+        return self.s
+    bandwidth = property(get_bandwidth)
+
+    def get_card_id(self):
+        return self.icc
+    card_id = property(get_card_id)
+
+    def get_serialnumber(self):
+        return self.ser
+    serialnumber = property(get_serialnumber)
 
     def get_html_version(self):
         """
@@ -88,7 +93,7 @@ class DoCoMoUserAgent(UserAgent):
         returns series name like '502i'.
         if unknow, return None.
         """
-        if self._is_foma and FOMA_SERIES_4DIGITS_RE.search(self.model):
+        if self.is_foma() and FOMA_SERIES_4DIGITS_RE.search(self.model):
             return 'FOMA'
 
         matcher = FOMA_SERIES_3DIGITS_RE.search(self.model)
@@ -105,7 +110,7 @@ class DoCoMoUserAgent(UserAgent):
         return self.model in ('F661i', 'F505iGPS')
 
     def is_foma(self):
-        return self._is_foma
+        return self.version == '2.0'
 
     def supports_cookie(self):
         return False
@@ -130,104 +135,10 @@ class DoCoMoUserAgent(UserAgent):
         except KeyError:
             params = {}
 
-        if self._display_bytes:
+        if self.display_bytes:
             try:
-                params['width_bytes'], params['height_bytes'] = map(int, self._display_bytes)
+                params['width_bytes'], params['height_bytes'] = self.display_bytes
             except ValueError:
                 pass
 
         return Display(**params)
-
-    def parse(self):
-        main, foma_or_comment = (self.useragent.split(' ', 1) + [None])[:2]
-        if not foma_or_comment:
-            # DoCoMo/1.0/R692i/c10
-            self._parse_main(main)
-        elif foma_or_comment[-1] != ')':
-            raise exceptions.NoMatchingError(self)
-        else:
-            if foma_or_comment[0] == '(':
-                # DoCoMo/1.0/P209is (Google CHTML Proxy/1.0)
-                self.comment = foma_or_comment[1:-1]
-                self._parse_main(main)
-            else:
-                # DoCoMo/2.0 N2001(c10;ser0123456789abcde;icc01234567890123456789)
-                self._is_foma = True
-                xxx, self.version = main.split('/')
-                self._parse_foma(foma_or_comment)
-
-    def _parse_main(self, main):
-        """
-        parse main part of HTTP_USER_AGENT string (not foma)
-        """
-        xxx, self.version, self.model, cache, rest = (main.split('/', 4) + [None, None, None, None])[:5]
-        if self.model == 'SH505i2':
-            self.model = 'SH505i'
-
-        if cache:
-            try:
-                self.cache_size = int(cache[1:])
-            except ValueError:
-                raise exceptions.NoMatchingError(self)
-
-        if rest:
-            for value in rest.split('/'):
-                if value in STATUS_SET:
-                    self.status = value
-                    continue
-
-                if value.startswith('ser') and len(value) == 14:
-                    self.serialnumber = value[3:]
-                    continue
-
-                if value.startswith('s'):
-                    try:
-                        self.bandwidth = int(value[1:])
-                        continue
-                    except ValueError:
-                        pass
-
-                matcher = DISPLAY_BYTES_RE.match(value)
-                if matcher:
-                    self._display_bytes = matcher.groups()
-
-    def _parse_foma(self, foma):
-        try:
-            self.model, foma_params = foma.split('(', 1)
-        except ValueError:
-            raise exceptions.NoMatchingError(self)
-
-        if self.model == 'MST_v_SH2101V':
-            self.model = 'SH2101V'
-
-        # for crawlers, such as
-        # DoCoMo/2.0 N902iS(c100;TB;W24H12)(compatible; moba-crawler; http://crawler.dena.jp/)
-        # DoCoMo/2.0 P900i(c100;TB;W24H11)(compatible; ichiro/mobile goo; +http://help.goo.ne.jp/door/crawler.html)
-        # DoCoMo/2.0 SO902i(c100;TB;W20H10) (symphonybot1.froute.jp; +http://search.froute.jp/howto/crawler.html)
-        foma_params = foma_params.split(')', 1)[0]
-
-        for value in foma_params.split(';'):
-            if value in STATUS_SET:
-                self.status = value
-                continue
-
-            if value.startswith('ser') and len(value) == 18:
-                self.serialnumber = value[3:]
-                continue
-
-            if value.startswith('icc') and len(value) == 23:
-                self.card_id = value[3:]
-                continue
-
-            if value.startswith('c'):
-                try:
-                    self.cache_size = int(value[1:])
-                    continue
-                except ValueError:
-                    pass
-
-            matcher = DISPLAY_BYTES_RE.match(value)
-            if matcher:
-                self._display_bytes = matcher.groups()
-                continue
-

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from tests import msg
-from uamobile import detect, exceptions, SoftBank
+from uamobile import detect
 
 def test_display():
     env = {'HTTP_USER_AGENT': 'Vodafone/1.0/V904SH/SHJ003/SN000000000000000 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1',
@@ -90,7 +90,6 @@ def test_useragent_softbank():
               serial_number=None, vendor=None, vendor_version=None, java_infos=None):
         ua = detect({'HTTP_USER_AGENT': useragent})
 
-        assert isinstance(ua, SoftBank)
         assert ua.carrier == 'SoftBank'
         assert ua.short_carrier == 'S'
 
@@ -186,12 +185,9 @@ def test_crawler():
 
 def test_error_agents():
     def tester(useragent):
-        try:
-            ua = detect({'HTTP_USER_AGENT':useragent})
-        except exceptions.NoMatchingError:
-            pass
-        else:
-            assert False, 'NoMatchingError expected'
+        ua = detect({'HTTP_USER_AGENT':useragent})
+        assert ua.is_softbank()
+
     for datum in ERRORS:
         yield tester, datum
 
