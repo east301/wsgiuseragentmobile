@@ -97,15 +97,15 @@ class UserAgent(object):
         """
         raise NotImplementedError
 
-    def is_bogus(self):
+    def _get_real_ip(self):
         """
-        return True if the client isn't accessing via gateways of
-        japanese mobile carrier
+        get real IP address of client from REMOTE_ADDR and
+        HTTP_X_FORWARDED_FOR variables
         """
         try:
             remote_addr = self.environ['REMOTE_ADDR']
         except KeyError:
-            return True
+            return None
 
         forwared_for = self.environ.get('HTTP_X_FORWARDED_FOR')
         if forwared_for and self._proxy_host:
@@ -120,8 +120,40 @@ class UserAgent(object):
                     break
 
         try:
-            remote_addr = cidr.IP(remote_addr)
+            return cidr.IP(remote_addr)
         except ValueError:
+            # invalid ip address, like 'unknown'
+            return None
+
+    def get_real_ip(self):
+        try:
+            return self._real_ip
+        except AttributeError:
+            self._real_ip = self._get_real_ip()
+            return self._real_ip
+
+    def is_crawler(self):
+        """
+        return True if the client is a mobile crawler
+        """
+        remote_addr = self.get_real_ip()
+        if remote_addr is None:
+            # who knows?
+            return False
+
+        for addr in cidr.get_ip('crawler'):
+            if remote_addr in addr:
+                return True
+
+        return False
+
+    def is_bogus(self):
+        """
+        return True if the client isn't accessing via gateways of
+        japanese mobile carrier
+        """
+        remote_addr = self.get_real_ip()
+        if remote_addr is None:
             return True
 
         for addr in cidr.get_ip(self.carrier):
