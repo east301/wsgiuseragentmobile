@@ -6,23 +6,54 @@ def test_get_ip_addrs():
         addrs = cidr.get_ip_addrs(carrier)
         assert isinstance(addrs, list)
         for addr in addrs:
-            assert isinstance(addr, tuple)
+            assert isinstance(addr, str)
 
     for c in ('docomo',
               'ezweb',
               'softbank',
               'willcom',
+              'crawler',
               # case insensitive
               'DoCoMo',
               'EZWeb',
               'SoftBank',
               'WILLCOM',
+              'Crawler',
               ):
         yield func, c
 
 def test_get_ip_addrs_error():
     try:
         cidr.get_ip_addrs('spam')
+    except ValueError:
+        pass
+    else:
+        assert False
+
+def test_get_ip():
+    def func(carrier):
+        addrs = cidr.get_ip(carrier)
+        assert isinstance(addrs, list)
+        for addr in addrs:
+            assert isinstance(addr, cidr.IP)
+
+    for c in ('docomo',
+              'ezweb',
+              'softbank',
+              'willcom',
+              'crawler',
+              # case insensitive
+              'DoCoMo',
+              'EZWeb',
+              'SoftBank',
+              'WILLCOM',
+              'Crawler',
+              ):
+        yield func, c
+
+def test_get_ip_addrs_error():
+    try:
+        cidr.get_ip('spam')
     except ValueError:
         pass
     else:
