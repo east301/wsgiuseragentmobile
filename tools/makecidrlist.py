@@ -4,6 +4,7 @@ import os
 import sys
 import optparse
 import pickle
+import pprint
 
 try:
     import simplejson
@@ -26,7 +27,7 @@ def main():
     parser.add_option("-o", "--filename", dest="filename", default=None,
                       help="the output filename. if None, use sys.stdout")
     parser.add_option("-f", "--format", dest="format", default='json',
-                      help="the output format. 'json' or 'pickle' or 'yaml' are supported right now")
+                      help="the output format. json/pickle/yaml/python")
     opts, args = parser.parse_args()
 
     if opts.carrier is None:
@@ -50,6 +51,8 @@ def main():
             print "To use 'yaml' format, you need PyYAML"
             sys.exit(1)
         dump_func = lambda result: yaml.dump([list(x) for x in result], output)
+    elif opts.format == 'python':
+        dump_func = lambda result: output.write("DATA = %s\n" % pprint.pformat(result, indent=2))
     else:
         # unsupported format
         print "unsupported format %s" % opts.format
