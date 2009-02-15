@@ -11,8 +11,7 @@ class CIDR(object):
         doc = etree.parse(stream, etree.HTMLParser())
         res = []
         for addr in self.do_scrape(doc):
-            ip, submask = addr.split("/")
-            res.append((str(ip), int(submask)))
+            res.append(str(addr))
         return res
 
     def get_stream(self):

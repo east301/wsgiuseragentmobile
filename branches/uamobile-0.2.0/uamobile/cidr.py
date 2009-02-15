@@ -3,7 +3,7 @@ from pkg_resources import resource_string
 import simplejson
 from IPy import IP
 
-from uamobile.cidrdata import crawler
+from uamobile.cidrdata import crawler, docomo, ezweb, softbank, willcom
 
 __all__ = ['IP', 'get_ip_addrs', 'get_ip']
 
@@ -12,17 +12,12 @@ def get_ip_addrs(carrier):
     if carrier not in ('docomo', 'ezweb', 'softbank', 'willcom', 'crawler'):
         raise ValueError('invalid carrier name "%s"' % carrier)
 
-    if carrier == 'crawler':
-        return crawler.DATA
-    else:
-        data = resource_string(__name__, 'data/cidr/%s.json' % carrier)
-        res = []
-        for ip, subnet in simplejson.loads(data):
-            if subnet is not None:
-                res.append('%s/%s' % (ip, subnet))
-            else:
-                res.append(ip)
-        return res
+    return { 'docomo'  : docomo.DATA,
+             'ezweb'   : ezweb.DATA,
+             'softbank': softbank.DATA,
+             'willcom' : willcom.DATA,
+             'crawler' : crawler.DATA,
+             }[carrier]
 
 def get_ip(carrier, _memo={}):
     try:
