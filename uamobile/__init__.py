@@ -14,12 +14,11 @@ def detect(environ, context=None):
     """
     parse HTTP user agent string and detect a mobile device.
     """
+    context = context or Context()
     try:
         useragent = environ['HTTP_USER_AGENT']
     except KeyError:
-        return NonMobile(environ)
-
-    context = context or Context()
+        return NonMobile(environ, context)
 
     if DOCOMO_RE.match(useragent):
         factory = context.docomo_factory()
@@ -30,6 +29,6 @@ def detect(environ, context=None):
     elif WILLCOM_RE.match(useragent):
         factory = context.willcom_factory()
     else:
-        return NonMobile(environ)
+        return NonMobile(environ, context)
 
     return factory.create(environ, context)
