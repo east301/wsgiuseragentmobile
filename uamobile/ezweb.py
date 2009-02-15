@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from uamobile import exceptions
 from uamobile.base import UserAgent, Display
 
 class EZwebUserAgent(UserAgent):
