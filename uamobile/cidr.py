@@ -9,14 +9,15 @@ __all__ = ['IP', 'get_ip_addrs', 'get_ip']
 
 def get_ip_addrs(carrier):
     carrier = carrier.lower()
-    if carrier not in ('docomo', 'ezweb', 'softbank', 'willcom', 'crawler'):
+    if carrier not in ('docomo', 'ezweb', 'softbank', 'willcom', 'crawler', 'nonmobile'):
         raise ValueError('invalid carrier name "%s"' % carrier)
 
-    return { 'docomo'  : docomo.DATA,
-             'ezweb'   : ezweb.DATA,
-             'softbank': softbank.DATA,
-             'willcom' : willcom.DATA,
-             'crawler' : crawler.DATA,
+    return { 'docomo'   : docomo.DATA,
+             'ezweb'    : ezweb.DATA,
+             'softbank' : softbank.DATA,
+             'willcom'  : willcom.DATA,
+             'crawler'  : crawler.DATA,
+             'nonmobile': [ '0.0.0.0/0' ],
              }[carrier]
 
 def get_ip(carrier, _memo={}):

@@ -13,12 +13,14 @@ def test_get_ip_addrs():
               'softbank',
               'willcom',
               'crawler',
+              'nonmobile',
               # case insensitive
               'DoCoMo',
               'EZWeb',
               'SoftBank',
               'WILLCOM',
               'Crawler',
+              'NonMobile',
               ):
         yield func, c
 
@@ -42,12 +44,14 @@ def test_get_ip():
               'softbank',
               'willcom',
               'crawler',
+              'nonmobile',
               # case insensitive
               'DoCoMo',
               'EZWeb',
               'SoftBank',
               'WILLCOM',
               'Crawler',
+              'NonMobile',
               ):
         yield func, c
 
