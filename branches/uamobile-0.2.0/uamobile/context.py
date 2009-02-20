@@ -14,19 +14,17 @@ class Context(object):
                  extra_crawler_ips=None,
                  docomo_factory=None, ezweb_factory=None, softbank_factory=None, willcom_factory=None):
         # extra IPs
-        self._extra_ips = { 'docomo'  : [],
-                            'ezweb'   : [],
-                            'softbank': [],
-                            'willcom' : [],
-                            'crawler' : [],
-                            }
+        self._extra_ips = {}
         for carrier, ips in (('docomo', extra_docomo_ips),
                              ('ezweb', extra_ezweb_ips),
                              ('softbank', extra_softbank_ips),
                              ('willcom', extra_willcom_ips),
                              ('crawler', extra_crawler_ips),
+                             ('nonmobile', None),
                              ):
-            if ips is None:
+            extra = self._extra_ips.setdefault(carrier, [])
+            if not ips:
+                # extra_ip is None or empty sequence
                 continue
 
             if not isinstance(ips, (list, tuple)):
