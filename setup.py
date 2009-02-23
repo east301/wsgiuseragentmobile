@@ -33,7 +33,7 @@ Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          # -*- Extra requirements: -*-
+        'IPy',
       ],
       entry_points="""
       # -*- Entry points: -*-
