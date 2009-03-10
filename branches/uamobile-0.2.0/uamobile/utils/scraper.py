@@ -33,9 +33,13 @@ class EZWebCIDR(CIDR):
 
     def do_scrape(self, doc):
         res = []
-        items = doc.xpath("""//table[@cellspacing="1"]/tr[@bgcolor="#ffffff"]/td[position()=2 or position()=3]/div/text()""")
-        for ip, mask in zip(items[0::2], items[1::2]):
-            res.append(ip + mask)
+        rows = doc.xpath("""//table[@cellspacing="1"]/tr[@bgcolor="#ffffff"]""")
+        for row in rows:
+            cols = row.xpath('./td/div[@class="TableText"]/text()')
+            if len(cols) == 4:
+                # deprecated
+                continue
+            res.append('%s%s' % (cols[1], cols[2]))
         return res
 
 
