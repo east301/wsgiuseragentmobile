@@ -29,6 +29,28 @@ class DoCoMoUserAgent(UserAgent):
         self.vendor = None
         self.html_version = None
 
+    def strip_serialnumber(self):
+        """
+        strip Device ID(Hardware ID) and FOMA card ID.
+        """
+        if not self.serialnumber and not self.card_id:
+            return super(DoCoMoUserAgent, self).strip_serialnumber()
+
+        # User-Agent contains device ID or FOMA card ID
+        ua = self.useragent
+        if self.is_foma():
+            # TODO
+            # should we simply use regular expression?
+            if self.serialnumber:
+                ua = ua.replace('ser%s' % self.serialnumber, '')
+
+            if self.card_id:
+                ua = ua.replace('icc%s' % self.card_id, '')
+
+            return ua.replace(';;', ';').replace(';)', ')').replace('(;', '(')
+        else:
+            return ua.replace('/ser%s' % self.serialnumber, '')
+
     def is_docomo(self):
         return True
 

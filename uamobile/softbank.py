@@ -14,6 +14,15 @@ class SoftBankUserAgent(UserAgent):
         """
         return self.is_3g() or self.is_type_w()
 
+    def strip_serialnumber(self):
+        """
+        strip Device ID(Hardware ID)
+        """
+        if not self.serialnumber:
+            return super(SoftBankUserAgent, self).strip_serialnumber()
+
+        return self.useragent.replace('/SN%s' % self.serialnumber, '')
+
     def is_softbank(self):
         return True
 

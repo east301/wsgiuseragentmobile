@@ -132,6 +132,11 @@ def test_useragent_ezweb():
     for args in DATA:
         yield ([inner] + list(args))
 
+def test_strip_serialnumber():
+    value = 'KDDI-TS2A UP.Browser/6.2.0.9 (GUI) MMP/2.0'
+    ua = detect({'HTTP_USER_AGENT': value})
+    # unchanged
+    assert ua.strip_serialnumber() == value
 
 def test_is_bogus():
     def func(ip, expected):
