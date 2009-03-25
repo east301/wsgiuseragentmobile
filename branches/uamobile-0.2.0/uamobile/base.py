@@ -24,6 +24,13 @@ class UserAgent(object):
     def __str__(self):
         return self.useragent
 
+    def strip_serialnumber(self):
+        """
+        strip serialnumber such as FOMA card ID of docomo
+        adn return a normalized User-Agent string.
+        """
+        return self.useragent
+
     def get_display(self):
         """
         returns Display object.

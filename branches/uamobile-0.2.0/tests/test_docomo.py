@@ -73,6 +73,24 @@ def test_guid():
     ua = detect({'HTTP_USER_AGENT':'DoCoMo/2.0 SO905i(c100;TB;W24H18)'})
     assert ua.guid is None
 
+def test_strip_serialnumber():
+    value = 'DoCoMo/2.0 N904i(c100;TB;W24H16)'
+    ua = detect({'HTTP_USER_AGENT': value})
+    assert ua.strip_serialnumber() == value
+
+    value = 'DoCoMo/1.0/SO213i/c10/TB/serSSSSS555555'
+    ua = detect({'HTTP_USER_AGENT': value})
+    assert ua.strip_serialnumber() == 'DoCoMo/1.0/SO213i/c10/TB'
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 N702iD(c100;TB;W24H12;ser356623000314657;icc8981100000327921096F)'})
+    assert ua.strip_serialnumber() == 'DoCoMo/2.0 N702iD(c100;TB;W24H12)', repr(ua.strip_serialnumber())
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 N702iD(c100;ser356623000314657;TB;icc8981100000327921096F;W24H12)'})
+    assert ua.strip_serialnumber() == 'DoCoMo/2.0 N702iD(c100;TB;W24H12)', repr(ua.strip_serialnumber())
+
+    ua = detect({'HTTP_USER_AGENT': 'DoCoMo/2.0 N702iD(icc8981100000327921096F;c100;TB;W24H12;ser356623000314657)'})
+    assert ua.strip_serialnumber() == 'DoCoMo/2.0 N702iD(c100;TB;W24H12)', repr(ua.strip_serialnumber())
+
 def test_not_matching_error():
     def func(ua):
         device = detect({'HTTP_USER_AGENT': ua})

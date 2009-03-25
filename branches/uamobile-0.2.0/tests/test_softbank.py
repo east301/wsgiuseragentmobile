@@ -78,6 +78,16 @@ def test_display_error():
     ua = detect(env)
     yield (func, ua, None, None, True, 262144)
 
+def test_strip_serialnumber():
+    value = 'SoftBank/1.0/816SH/SHJ001 Browser/NetFront/3.4 Profile/MIDP-2.0 Configuration/CLDC-1.1'
+    ua = detect({'HTTP_USER_AGENT': value})
+    assert ua.strip_serialnumber() == value
+
+    ua = detect({'HTTP_USER_AGENT':
+                     'Vodafone/1.0/V904SH/SHJ003/SN000000000000000 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1'})
+    res = ua.strip_serialnumber()
+    assert res == 'Vodafone/1.0/V904SH/SHJ003 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1', repr(res)
+
 def test_jphone_uid():
     useragent = 'Vodafone/1.0/V904SH/SHJ003/SN000000000000000 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1'
     ua = detect({'HTTP_USER_AGENT': useragent,

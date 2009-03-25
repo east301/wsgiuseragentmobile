@@ -42,6 +42,12 @@ def test_display_default():
     assert ua.display.is_qvga() is True
 
 
+def test_strip_serialnumber():
+    value = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4'
+    ua = detect({'HTTP_USER_AGENT': value})
+    assert ua.strip_serialnumber() == value
+
+
 #########################
 # Test data
 #########################
