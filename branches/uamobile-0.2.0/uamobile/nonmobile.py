@@ -5,6 +5,7 @@ class NonMobileUserAgent(UserAgent):
     name = 'NonMobile'
     carrier = 'NonMobile'
     short_carrier = 'N'
+    serialnumber = None
 
     def get_name(self):
         return 'NonMobile'
@@ -20,5 +21,3 @@ class NonMobileUserAgent(UserAgent):
         create a new Display object.
         """
         return Display()
-
-    serialnumber = property(lambda _: None)
