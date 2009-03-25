@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
 from uamobile.base import UserAgent, Display
-import re
-
-VODAFONE_VENDOR_RE = re.compile(r'V\d+([A-Z]+)')
-JPHONE_VENDOR_RE = re.compile(r'J-([A-Z]+)')
-CRAWLER_RE = re.compile(r'^(.+?)\([^)]+\)$')
 
 class SoftBankUserAgent(UserAgent):
     carrier = 'SoftBank'
     short_carrier = 'S'
-
-    def __init__(self, *args, **kwds):
-        super(SoftBankUserAgent, self).__init__(*args, **kwds)
-        self.serialnumber = None
+    serialnumber = None
 
     def supports_cookie(self):
         """
