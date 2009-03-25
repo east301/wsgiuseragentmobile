@@ -5,15 +5,6 @@ class EZwebUserAgent(UserAgent):
     carrier = 'EZweb'
     short_carrier = 'E'
 
-    """
-    def __init__(self, *args, **kwds):
-        UserAgent.__init__(self, *args, **kwds)
-        self._comment = None
-        self.xhtml_compliant = False
-        self.device_id = ''
-        self.server = ''
-        """
-
     def supports_cookie(self):
         return True
 
