@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 from uamobile.base import UserAgent, Display
-import re
-
-WILLCOM_RE = re.compile(r'^Mozilla/3\.0\((?:DDIPOCKET|WILLCOM);(.*)\)')
-CACHE_RE = re.compile(r'^[Cc](\d+)')
-WINDOWS_CE_RE = re.compile(r'^Mozilla/4\.0 \((.*)\)')
 
 class WillcomUserAgent(UserAgent):
     name = 'WILLCOM'
