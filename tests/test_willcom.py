@@ -28,6 +28,16 @@ def test_useragent():
         yield ([inner] + list(args))
 
 
+def test_display_default():
+    ua = detect({'HTTP_USER_AGENT':'Mozilla/3.0(WILLCOM;KYOCERA/WX310K/2;1.2.7.17.000000/0.1/C100) Opera 7.0'})
+    assert ua.display.width != 0
+    assert ua.display.height != 0
+    assert ua.display.color
+    assert ua.display.depth
+    assert ua.display.is_vga() is False
+    assert ua.display.is_qvga() is True
+
+
 def test_is_bogus():
     def func(ip, expected):
         ua = detect({'HTTP_USER_AGENT': 'Mozilla/3.0(WILLCOM;SANYO/WX310SA/2;1/1/C128) NetFront/3.3,61.198.142.127',
