@@ -6,11 +6,15 @@ DOCOMO = (
      { 'version': '1.0',
        'model'  : 'R692i',
        'c'      : 10,
+       'series' : '692i',
+       'html_version': '3.0',
       }),
 
     ('DoCoMo/1.0/P209is (Google CHTML Proxy/1.0)',
      { 'version': '1.0',
        'model'  : 'P209is',
+       'series' : '209i',
+       'html_version': '2.0',
        }),
 
     ('DoCoMo/2.0 N2001(c10;ser0123456789abcde;icc01234567890123456789)',
@@ -19,6 +23,8 @@ DOCOMO = (
        'c': 10,
        'ser'    : '0123456789abcde',
        'icc'    : '01234567890123456789',
+       'series' : 'FOMA',
+       'html_version': '3.0',
        },
      ),
 
@@ -30,6 +36,8 @@ DOCOMO = (
        'ser'    : '0123456789abcdf',
        'icc'    : '01234567890123456789',
        'display_bytes': (24, 12),
+       'series' : '703i',
+       'html_version': '7.0',
        },
      ),
 
@@ -39,6 +47,8 @@ DOCOMO = (
        'c': 100,
        'status' : 'TB',
        'display_bytes': (24, 12),
+       'series' : '902i',
+       'html_version': '6.0',
        },
      ),
 )
