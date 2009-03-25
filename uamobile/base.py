@@ -171,12 +171,12 @@ class Display(object):
     Display information for mobile devices.
     """
 
-    def __init__(self, width=None, height=None, depth=None, color=None,
+    def __init__(self, width=0, height=0, depth=0, color=0,
                  width_bytes=None, height_bytes=None):
-        self.width = width or 0
-        self.height = height or 0
-        self.depth = depth or 0
-        self.color = color or 0
+        self.width  = width
+        self.height = height
+        self.depth  = depth
+        self.color  = color
         self.width_bytes = width_bytes
         self.height_bytes = height_bytes
 

@@ -30,7 +30,7 @@ def test_display_error():
            }
 
     def func(ua, width, height, color, depth):
-        assert ua.display.width == width
+        assert ua.display.width == width, repr(ua.display.width)
         assert ua.display.height == height
         assert ua.display.color == color
         assert ua.display.depth == depth
@@ -60,23 +60,23 @@ def test_display_error():
     env = dict(base_env)
     del env['HTTP_X_JPHONE_DISPLAY']
     ua = detect(env)
-    yield (func, ua, 0, 0, True, 262144)
+    yield (func, ua, None, None, True, 262144)
 
     env = dict(base_env)
     env['HTTP_X_JPHONE_DISPLAY'] = '480'
     ua = detect(env)
-    yield (func, ua, 0, 0, True, 262144)
+    yield (func, ua, None, None, True, 262144)
 
     env = dict(base_env)
     env['HTTP_X_JPHONE_DISPLAY'] = '480*spam'
     ua = detect(env)
-    yield (func, ua, 0, 0, True, 262144)
+    yield (func, ua, None, None, True, 262144)
 
     # Invalid type
     env = dict(base_env)
     env['HTTP_X_JPHONE_DISPLAY'] = 1
     ua = detect(env)
-    yield (func, ua, 0, 0, True, 262144)
+    yield (func, ua, None, None, True, 262144)
 
 def test_jphone_uid():
     useragent = 'Vodafone/1.0/V904SH/SHJ003/SN000000000000000 Browser/VF-NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1'

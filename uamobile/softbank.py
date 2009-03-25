@@ -73,8 +73,8 @@ class SoftBankUserAgent(UserAgent):
         create a new Display object.
         """
         try:
-            width, height = map(int, self.environ['HTTP_X_JPHONE_DISPLAY'].split('*', 1))
-        except (KeyError, ValueError, AttributeError):
+            width, height = map(int, self.environ.get('HTTP_X_JPHONE_DISPLAY', '').split('*', 1))
+        except (ValueError, AttributeError):
             width = None
             height = None
 

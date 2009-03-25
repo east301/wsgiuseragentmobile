@@ -69,24 +69,24 @@ def test_display_error():
     env = dict(base_env)
     del env['HTTP_X_UP_DEVCAP_SCREENPIXELS']
     ua = detect(env)
-    assert ua.display.width == 0
-    assert ua.display.height == 0
+    assert ua.display.width is None
+    assert ua.display.height is None
     assert ua.display.color
     assert ua.display.depth
 
     env = dict(base_env)
     env['HTTP_X_UP_DEVCAP_SCREENPIXELS'] = '240,egg'
     ua = detect(env)
-    assert ua.display.width == 0
-    assert ua.display.height == 0
+    assert ua.display.width is None
+    assert ua.display.height is None
     assert ua.display.color
     assert ua.display.depth
 
     env = dict(base_env)
     env['HTTP_X_UP_DEVCAP_SCREENPIXELS'] = '240,268,1'
     ua = detect(env)
-    assert ua.display.width == 0
-    assert ua.display.height == 0
+    assert ua.display.width is None
+    assert ua.display.height is None
     assert ua.display.color
     assert ua.display.depth
 
@@ -97,7 +97,7 @@ def test_display_error():
     assert ua.display.width == 240
     assert ua.display.height == 268
     assert ua.display.color
-    assert ua.display.depth == 0
+    assert ua.display.depth is None
 
     env = dict(base_env)
     env['HTTP_X_UP_DEVCAP_SCREENDEPTH'] = 'spam'
@@ -105,7 +105,7 @@ def test_display_error():
     assert ua.display.width == 240
     assert ua.display.height == 268
     assert ua.display.color
-    assert ua.display.depth == 0
+    assert ua.display.depth is None
 
 def test_useragent_ezweb():
     def inner(useragent, version, model, device_id, server, xhtml_compliant, comment, is_wap1, is_wap2):
