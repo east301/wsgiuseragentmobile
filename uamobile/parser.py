@@ -9,12 +9,7 @@ class UserAgentParser(object):
 # docomo
 ###################################
 
-try:
-    frozenset
-except NameError:
-    from sets import Set as frozenset
-
-STATUS_SET = frozenset(['TC', 'TD', 'TB', 'TJ'])
+DOCOMO_STATUS_SET = ('TB', 'TC', 'TD', 'TJ')
 
 DOCOMO_VENDOR_RE = re.compile(r'([A-Z]+)\d')
 
@@ -113,7 +108,7 @@ class DoCoMoUserAgentParser(UserAgentParser):
 
         if rest:
             for value in rest.split('/'):
-                if value in STATUS_SET:
+                if value in DOCOMO_STATUS_SET:
                     params['status'] = value
                     continue
 
@@ -171,7 +166,7 @@ class DoCoMoUserAgentParser(UserAgentParser):
                    'html_version' : _get_docomo_html_version(model),
                    }
         for value in foma_params.split(';'):
-            if value in STATUS_SET:
+            if value in DOCOMO_STATUS_SET:
                 params['status'] = value
                 continue
 
