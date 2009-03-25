@@ -47,6 +47,16 @@ def test_useragent_docomo():
     for args in DATA:
         yield ([inner] + list(args))
 
+def test_display_default():
+    # the following User-Agent doesn't exist at least in spring 2009
+    ua = detect({'HTTP_USER_AGENT':'DoCoMo/2.0 SH99A(c100;TB;W24H16)'})
+    assert ua.display.width != 0
+    assert ua.display.height != 0
+    assert ua.display.color
+    assert ua.display.depth
+    assert ua.display.is_vga() is False
+    assert ua.display.is_qvga() is True
+
 def test_display_bytes():
     ua = detect({'HTTP_USER_AGENT':'DoCoMo/1.0/F505i/c20/TB/W20H10'})
     assert ua.display.width_bytes == 20

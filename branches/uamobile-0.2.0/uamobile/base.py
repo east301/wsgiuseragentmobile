@@ -171,7 +171,7 @@ class Display(object):
     Display information for mobile devices.
     """
 
-    def __init__(self, width=0, height=0, depth=0, color=0,
+    def __init__(self, width=240, height=320, depth=262144, color=1,
                  width_bytes=None, height_bytes=None):
         self.width  = width
         self.height = height
