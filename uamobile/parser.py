@@ -338,7 +338,7 @@ class SoftBankUserAgentParser(UserAgentParser):
 
             try:
                 vendor, vendor_version = ua[1].split('/')
-            except ValueError, e:
+            except ValueError as e:
                 pass
 
             java_info.update([x.split('/') for x in ua[2:]])
@@ -441,7 +441,7 @@ class WillcomUserAgentParser(UserAgentParser):
                      'arch'           : arch.strip(),
                      'display_bytes'  : width_and_height.strip(),
                      }
-        except ValueError, e:
+        except ValueError as e:
             return {}
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from lxml import etree
 
 class CIDR(object):
@@ -15,7 +15,7 @@ class CIDR(object):
         return res
 
     def get_stream(self):
-        return urllib2.urlopen(self.url)
+        return urllib.request.urlopen(self.url)
 
     def do_scrape(self, doc):
         raise NotImplementedError()
